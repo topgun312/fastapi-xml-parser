@@ -9,11 +9,12 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from loguru import logger
 from redis import asyncio as aioredis
-
+from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from src.api.parser_data.v1.routers import parse_router, prompt_router
 from src.metadata import DESCRIPTION, TAG_METADATA, TITLE, VERSION
 from src.tasks.tasks import get_file_from_site
+from starlette_exporter import handle_metrics, PrometheusMiddleware
 
 
 @asynccontextmanager
@@ -64,3 +65,16 @@ def create_fastapi_app():
 
 
 app = create_fastapi_app()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(PrometheusMiddleware)
+app.add_route("/metrics", handle_metrics)
+
+
+# dLsDQIUn
